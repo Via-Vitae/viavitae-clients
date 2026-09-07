@@ -1,0 +1,40 @@
+name: "Client offboarding"
+description: "Request to offboard a client tenant (archive + deprovision)"
+title: "chore: offboard <client-slug>"
+labels: ["client/offboarding"]
+body:
+  - type: input
+    id: slug
+    attributes:
+      label: Client slug
+      description: "Tenant slug to offboard"
+    validations:
+      required: true
+  - type: dropdown
+    id: reason
+    attributes:
+      label: Reason for offboarding
+      options:
+        - Client request
+        - Contract ended
+        - Non-payment
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Offboarding notes
+      description: "Confirm: DB archive scheduled, domain DNS handover, 24-month retention acknowledged per GDPR Art. 5(1)(e)"
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Offboarding checklist
+      options:
+        - label: Client has been notified in writing
+        - label: Database backup is scheduled before deprovision
+        - label: Domain DNS handover plan is confirmed
+        - label: 24-month retention period acknowledged (then erasure)
+        - label: Consent registry records will be archived with the tenant

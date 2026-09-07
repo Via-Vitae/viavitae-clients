@@ -1,0 +1,26 @@
+# Domain policy for client tenants
+# DNS is managed via the viavitae-infra repository.
+
+rules:
+  # All client domains must CNAME to the cluster ingress
+  primary_domain:
+    type: CNAME
+    target: "cluster.viavitae.com"
+    managed_by: "viavitae-infra"
+
+  # Aliases redirect to the primary domain
+  aliases:
+    type: "redirect (301)"
+    target: "primary domain"
+
+  # TLS is managed by cert-manager with ACME/Let's Encrypt
+  tls:
+    provider: "cert-manager"
+    issuer: "letsencrypt-production"
+    caa_restricted: true
+
+  # CAA records must restrict to Let's Encrypt only
+  caa_records:
+    - "0 issue \"letsencrypt.org\""
+    - "0 issuewild \"letsencrypt.org\""
+    - "0 iodef \"mailto:security@viavitae.com\""

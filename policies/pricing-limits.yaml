@@ -1,0 +1,23 @@
+# Pricing guardrails — enforced by scripts/validate_tenants.py.
+# These prevent accidental mispricing in tenant.yaml.
+
+tiers:
+  economy:
+    price_monthly_eur: 900
+    approx_pages: 10
+  normal:
+    price_monthly_eur: 1900
+    approx_pages: 15
+  vip:
+    price_monthly_eur: 2900
+    approx_pages: 20
+
+maintenance:
+  standard:
+    price_monthly_eur: 30
+  premium:
+    price_monthly_eur: 50
+
+# Maintenance price is locked to €30–50/mo. Any other value fails validation.
+maintenance_min_eur: 30
+maintenance_max_eur: 50

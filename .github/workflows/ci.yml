@@ -1,0 +1,239 @@
+name: CI
+
+# Continuous integration for viavitae-clients tenant registry.
+#
+# Pipeline: lint (ruff + yamllint) -> typecheck (mypy) -> test (pytest >=80% coverage)
+#           -> SAST (Semgrep) -> dependency scan (Trivy)
+#
+# SECURITY (rule R4)
+#   - Least-privilege GITHUB_TOKEN: contents: read for the whole workflow.
+#   - Every third-party action must be pinned to a full-length commit SHA.
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "ci-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # lint — ruff (Python scripts) + yamllint (tenant YAML)
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install linters
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          pip install ruff yamllint
+
+      - name: Ruff check
+        run: ruff check scripts/
+
+      - name: Ruff format check
+        run: ruff format --check scripts/
+
+      - name: Yamllint
+        run: yamllint -c .yamllint.yml clients/ policies/
+
+  # ---------------------------------------------------------------------------
+  # typecheck — mypy strict on validation scripts
+  # ---------------------------------------------------------------------------
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          pip install mypy pyyaml jsonschema
+          [ -f requirements.txt ] && pip install -r requirements.txt || true
+          [ -f requirements-dev.txt ] && pip install -r requirements-dev.txt || true
+
+      - name: mypy (strict)
+        run: mypy --strict --ignore-missing-imports scripts/
+
+  # ---------------------------------------------------------------------------
+  # test — unit tests with 80% coverage gate
+  # ---------------------------------------------------------------------------
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pyyaml jsonschema
+          [ -f requirements.txt ] && pip install -r requirements.txt || true
+          [ -f requirements-dev.txt ] && pip install -r requirements-dev.txt || true
+
+      - name: Pytest with coverage gate
+        run: |
+          set -euo pipefail
+          if [ -d tests ] || find . -name 'test_*.py' -not -path './.venv/*' -print -quit | grep -q .; then
+            pytest --cov --cov-report=xml --cov-report=term-missing \
+                   --cov-fail-under=80 --junitxml=junit.xml
+          else
+            echo "::warning::No tests found. Add tests or record an ADR explaining the exemption."
+            exit 1
+          fi
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: coverage
+          path: |
+            coverage.xml
+            junit.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------
+  # sast — Semgrep
+  # ---------------------------------------------------------------------------
+  sast:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Semgrep
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          pip install semgrep
+
+      - name: Run Semgrep
+        run: |
+          set -euo pipefail
+          semgrep scan \
+            --config p/security-audit --config p/secrets --config p/python \
+            --metrics=off --error --severity ERROR \
+            --exclude=.venv --exclude=node_modules \
+            --sarif --output semgrep.sarif || {
+              echo "::error::Semgrep reported findings at ERROR severity."
+              exit 1
+            }
+
+      - name: Upload Semgrep SARIF
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: semgrep-sarif
+          path: semgrep.sarif
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------
+  # dependency-scan — Trivy filesystem
+  # ---------------------------------------------------------------------------
+  dependency-scan:
+    name: Dependency scan (Trivy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # v0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig,license
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+          ignore-unfixed: true
+          format: table
+
+      - name: Trivy SARIF report
+        if: always()
+        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # v0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: CRITICAL,HIGH
+          exit-code: "0"
+          format: sarif
+          output: trivy.sarif
+
+      - name: Upload Trivy SARIF
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: trivy-sarif
+          path: trivy.sarif
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------
+  # ci-status — single required check for branch protection
+  # ---------------------------------------------------------------------------
+  ci-status:
+    name: CI status
+    needs: [lint, typecheck, test, sast, dependency-scan]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Evaluate required gates
+        run: |
+          set -euo pipefail
+          results='${{ toJSON(needs) }}'
+          printf '%s\n' "$results" | jq -r 'to_entries[] | "  \(.key): \(.value.result)"'
+          failed=$(printf '%s\n' "$results" | jq '[to_entries[] | select(.value.result != "success" and .value.result != "skipped")] | length')
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::${failed} CI gate(s) did not succeed."
+            exit 1
+          fi
+          echo "All CI gates passed."

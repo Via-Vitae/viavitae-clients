@@ -1,0 +1,66 @@
+# viavitae-clients .gitignore
+# Tailored for a YAML/MDX/JSON tenant registry with Python validation scripts.
+#
+# Never un-ignore a secret, key, state file or environment file.
+
+# --- Secrets and credentials -------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+secrets/
+.secrets.baseline
+
+# --- Python ------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage/
+coverage.xml
+htmlcov/
+junit.xml
+*.egg-info/
+.eggs/
+.cache/
+
+# --- Node and frontend -------------------------------------------------------
+node_modules/
+.npm/
+.yarn/
+
+# --- Build artefacts ---------------------------------------------------------
+*.log
+npm-debug.log*
+
+# --- Editors and IDEs --------------------------------------------------------
+.idea/*
+!.idea/runConfigurations/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+
+# --- Operating systems -------------------------------------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# --- Local staging and scratch -----------------------------------------------
+/.qoder/
+*.iml
+generated/reports/latest/*.log

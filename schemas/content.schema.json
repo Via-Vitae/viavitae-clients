@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://viavitae.com/schemas/content.schema.json",
+  "title": "ViaVitae MDX Content Front-matter",
+  "description": "Schema for MDX front-matter in client content files.",
+  "type": "object",
+  "required": ["title", "lang", "type"],
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "lang": { "type": "string", "enum": ["lt", "en", "ru"] },
+    "type": { "type": "string", "enum": ["page", "news", "block"] },
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "description": { "type": "string" },
+    "image": { "type": "string" },
+    "image_alt": { "type": "string", "description": "Required for WCAG. Must not be empty if image is present." },
+    "published": { "type": "boolean", "default": true },
+    "date": { "type": "string", "format": "date" },
+    "order": { "type": "integer", "minimum": 0 }
+  }
+}

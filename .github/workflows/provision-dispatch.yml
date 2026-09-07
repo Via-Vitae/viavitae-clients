@@ -1,0 +1,96 @@
+name: Provision dispatch
+
+# Triggered after merge to main. Dispatches the merged tenant changes to the
+# provisioning pipeline via viavitae-api tenant endpoint.
+#
+# Auth: GitHub App installation token (preferred) or PROVISIONING_TOKEN PAT.
+# Webhook URL: PROVISIONING_WEBHOOK_URL repository variable.
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "clients/**"
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "Client slug to provision (leave empty for all changed)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "provision-dispatch"
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  dispatch:
+    name: Dispatch to provisioning pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 2
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          pip install pyyaml jsonschema requests
+
+      - name: Determine changed tenants
+        id: changed
+        run: |
+          set -euo pipefail
+          if [ -n "${{ inputs.slug }}" ]; then
+            echo "slugs=${{ inputs.slug }}" >> "$GITHUB_OUTPUT"
+          else
+            slugs=$(git diff --name-only HEAD~1 HEAD -- clients/ | \
+              grep -oP 'clients/\K[^/]+' | sort -u | grep -v '^_' || true)
+            echo "slugs=$(echo $slugs | tr ' ' ',')" >> "$GITHUB_OUTPUT"
+            echo "changed tenants: $slugs"
+          fi
+
+      - name: Generate manifest
+        run: |
+          set -euo pipefail
+          python scripts/generate_manifest.py
+
+      - name: Dispatch provisioning
+        if: steps.changed.outputs.slugs != ''
+        env:
+          PROVISIONING_TOKEN: ${{ secrets.PROVISIONING_TOKEN }}
+          PROVISIONING_WEBHOOK_URL: ${{ vars.PROVISIONING_WEBHOOK_URL }}
+        run: |
+          set -euo pipefail
+          IFS=',' read -ra SLUGS <<< "${{ steps.changed.outputs.slugs }}"
+          for slug in "${SLUGS[@]}"; do
+            echo "Dispatching provisioning for: $slug"
+            response=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST \
+              -H "Authorization: Bearer ${PROVISIONING_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"slug\": \"${slug}\", \"action\": \"provision\"}" \
+              "${PROVISIONING_WEBHOOK_URL}")
+            if [ "$response" -ge 200 ] && [ "$response" -lt 300 ]; then
+              echo "Dispatch succeeded for $slug (HTTP $response)"
+            else
+              echo "::error::Dispatch failed for $slug (HTTP $response)"
+              exit 1
+            fi
+          done
+
+      - name: Confirm dispatch
+        if: steps.changed.outputs.slugs == ''
+        run: echo "No tenant changes detected. Nothing to dispatch."

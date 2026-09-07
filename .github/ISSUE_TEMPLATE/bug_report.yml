@@ -1,0 +1,55 @@
+name: "Bug report"
+description: "Report a defect in validation scripts, schemas, CI workflows or tenant data"
+title: "fix: <short description>"
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear description of the bug
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: How to reproduce the issue
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What should happen
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: What actually happens
+    validations:
+      required: true
+  - type: input
+    id: affected_slug
+    attributes:
+      label: Affected tenant slug (if any)
+      description: "e.g. kauno-sv-petro-parapija, or 'all' for schema/script bugs"
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Low — cosmetic or minor
+        - Medium — blocks a workflow
+        - High — blocks client onboarding or live operations
+        - Critical — security or data loss
+    validations:
+      required: true
+  - type: checkboxes
+    id: sensitive
+    attributes:
+      label: Sensitive data
+      options:
+        - label: This report does NOT contain any personal data, secrets or credentials

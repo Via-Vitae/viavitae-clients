@@ -1,0 +1,7 @@
+# Theme overrides for the example tenant.
+# Validated against schemas/theme.schema.json.
+# All fields are optional — remove this file if no overrides are needed.
+
+logo_variant: default
+# accent_color: "#2563eb"  # Uncomment and set to override the default accent
+# font_override: default   # default|serif|sans

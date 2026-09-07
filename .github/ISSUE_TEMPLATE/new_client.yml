@@ -1,0 +1,84 @@
+name: "New client onboarding"
+description: "Request to onboard a new parish/organisation as a ViaVitae tenant"
+title: "feat: onboard <client-slug>"
+labels: ["client/onboarding"]
+assignees:
+  - JourneyOfLife
+body:
+  - type: input
+    id: display_name
+    attributes:
+      label: Display name
+      description: Full official name of the organisation (e.g. "Kauno Šv. Petro ir Povilo parapija")
+    validations:
+      required: true
+  - type: input
+    id: slug
+    attributes:
+      label: Proposed slug
+      description: "Lowercase, hyphen-separated, no diacritics (e.g. kauno-sv-petro-parapija)"
+      pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+    validations:
+      required: true
+  - type: dropdown
+    id: org_type
+    attributes:
+      label: Organisation type
+      options:
+        - parish
+        - basilica
+        - cathedral
+        - diocese
+        - deanery
+        - funeral
+        - cemetery
+        - store
+        - other
+    validations:
+      required: true
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Tier
+      options:
+        - economy (~10 pages, €900)
+        - normal (~15 pages, €1900)
+        - vip (~20 pages + e-commerce, €2900)
+    validations:
+      required: true
+  - type: dropdown
+    id: maintenance
+    attributes:
+      label: Maintenance plan
+      options:
+        - standard (€30/mo)
+        - premium (€50/mo)
+    validations:
+      required: true
+  - type: input
+    id: domain
+    attributes:
+      label: Primary domain
+      description: "e.g. www.petroparapija.lt"
+    validations:
+      required: true
+  - type: input
+    id: admin_email
+    attributes:
+      label: Admin contact email
+      description: Public admin email for the tenant
+    validations:
+      required: true
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Consent confirmations
+      options:
+        - label: Written consent is on file for any clergy personal data
+        - label: DPIA will be completed before any consent-flagged features are enabled
+        - label: Client has confirmed their domain DNS can be pointed to our cluster
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes
+      description: Any special requirements, add-ons needed, or integration details

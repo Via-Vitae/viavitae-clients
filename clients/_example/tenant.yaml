@@ -1,0 +1,65 @@
+# =============================================================================
+# EXAMPLE TENANT — DO NOT USE IN PRODUCTION
+# =============================================================================
+# This is a fully commented reference tenant.yaml for a fictional parish.
+# Copy this directory to clients/<your-slug>/ and replace all values.
+#
+# Schema: schemas/tenant.schema.json (version 1)
+# Guardrails: see README.md guardrails table (G1–G9)
+# =============================================================================
+
+schema_version: 1                              # Must match schemas/tenant.schema.json
+
+identity:
+  slug: example-parapija                       # G1: lowercase, hyphens, no diacritics
+  display_name: "Pavyzdinė Šv. Onos parapija"  # Full official name (with LT characters)
+  organization_type: parish                    # basilica|cathedral|diocese|deanery|
+                                               # parish|funeral|cemetery|store|other
+  country: LT                                  # Pilot: LT only
+  language_default: lt                         # lt|en|ru
+
+tier:
+  package: normal                              # economy(~10p €900)|normal(~15p €1900)|
+                                               # vip(~20p + e-commerce €2900)
+  maintenance_plan: standard                   # standard €30/mo | premium €50/mo
+  billing_ref: billing.schema.json#normal      # Reference to schemas/billing.schema.json
+  addons:
+    donation_flow: true                        # requires tier >= economy
+    donation_impact_page: true                 # requires tier >= economy
+    ai_pastoral_assistant: false               # requires tier >= normal + approval
+    gps_cemetery_map: false                    # requires consent flags
+    crm_dashboard: true                        # Bitrix24 (client-side, fictional data)
+    e_commerce: false                          # vip only
+
+pages:                                         # Must match content/<lang>/pages/ structure
+  - index
+  - apie
+  - kontaktai
+  - tvarkarastis
+  - dvasininkai
+  - galerija
+
+domains:
+  primary: www.example-parapija.lt             # DNS managed via viavitae-infra
+  aliases: [example-parapija.lt]
+  tls: managed                                 # cert-manager, CAA restricted
+
+contacts:                                      # PUBLIC contact data only — no PII
+  admin_email: admin@example-parapija.lt
+  billing_email: taryba@example-parapija.lt
+  phone: "+370 600 00000"
+
+consent_flags:                                 # GDPR-sensitive features
+  publishes_clergy_personal_data: false        # If true → docs/consent-registry/<slug>.yaml
+  cemetery_grave_search: false                 # If true → DPIA required
+  ai_assistant_approved_by: null               # Name + date when enabled
+
+integrations:
+  bitrix24_pipeline: lt-parishes               # CRM pipeline key
+  payments: stripe+paysera                     # Enabled providers
+  analytics_id: matomo-EXAMPLE                 # Analytics identifier
+
+status: active                                 # active|suspended|offboarding|archived
+created_by: provisioning-bot
+created_at: "2026-09-07"
+change_history_ref: CHANGELOG.md

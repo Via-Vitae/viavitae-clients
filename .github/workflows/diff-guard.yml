@@ -1,0 +1,42 @@
+name: Diff guard
+
+# Blocks hand-edits to generated/** unless the PR carries a provenance label
+# from the provisioning bot. This enforces guardrail G7.
+
+on:
+  pull_request:
+    paths:
+      - "generated/**"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: "diff-guard-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  check-provenance:
+    name: Verify generated/ provenance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check for provisioning-bot label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          labels=$(gh pr view "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --json labels --jq '.labels[].name' 2>/dev/null || echo "")
+
+          if echo "$labels" | grep -q "provisioning-bot"; then
+            echo "PR has provisioning-bot provenance label. generated/ changes are permitted."
+          else
+            echo "::error::Changes to generated/ require the 'provisioning-bot' provenance label."
+            echo "Humans must not edit generated/ directly. These files are produced by the"
+            echo "provisioning pipeline. If this is a legitimate pipeline output, re-run the"
+            echo "provision-dispatch workflow to regenerate with the correct label."
+            exit 1
+          fi

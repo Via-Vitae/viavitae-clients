@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://viavitae.com/schemas/billing.schema.json",
+  "title": "ViaVitae Billing Reference",
+  "description": "Tier pricing and add-on costs. Referenced by tenant.yaml tier.billing_ref.",
+  "type": "object",
+  "properties": {
+    "tiers": {
+      "type": "object",
+      "properties": {
+        "economy": { "type": "object", "properties": { "price_monthly_eur": { "type": "number" }, "approx_pages": { "type": "integer" } } },
+        "normal": { "type": "object", "properties": { "price_monthly_eur": { "type": "number" }, "approx_pages": { "type": "integer" } } },
+        "vip": { "type": "object", "properties": { "price_monthly_eur": { "type": "number" }, "approx_pages": { "type": "integer" } } }
+      }
+    },
+    "maintenance": {
+      "type": "object",
+      "properties": {
+        "standard": { "type": "number", "const": 30 },
+        "premium": { "type": "number", "const": 50 }
+      }
+    },
+    "addons": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    }
+  }
+}

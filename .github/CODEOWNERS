@@ -1,0 +1,26 @@
+# CODEOWNERS for viavitae-clients
+# Rule R2: this file is never empty and always resolves to real identities.
+# The default rule requires approval from both owner and four-eyes reviewer.
+
+# Default — all files require review from owner + four-eyes
+* @JourneyOfLife @IterVitae
+
+# Tenant data — highest scrutiny, both reviewers mandatory
+clients/*/tenant.yaml @JourneyOfLife @IterVitae
+
+# Content changes — both reviewers
+clients/*/content/ @JourneyOfLife @IterVitae
+
+# Schema changes — both reviewers + ADR required
+schemas/ @JourneyOfLife @IterVitae
+
+# Policy changes — both reviewers
+policies/ @JourneyOfLife @IterVitae
+
+# Generated artifacts — machine-only, diff-guard.yml enforces provenance label
+# generated/ is protected by workflow, not CODEOWNERS
+
+# Governance files — both reviewers, R2 immutability applies
+/SECURITY.md @JourneyOfLife @IterVitae
+/LICENSE @JourneyOfLife @IterVitae
+/.github/CODEOWNERS @JourneyOfLife @IterVitae

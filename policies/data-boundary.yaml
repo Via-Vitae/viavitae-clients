@@ -1,0 +1,29 @@
+# Data boundary policy — what MAY NOT be stored in this repository.
+# Enforced by scripts/check_data_boundary.py.
+
+# ALLOWED (public contact data only):
+allowed:
+  - organisation_name
+  - public_admin_email
+  - public_billing_email
+  - public_phone_number
+  - public_address
+  - public_domain_names
+
+# FORBIDDEN (must never appear in tenant.yaml or content/):
+forbidden:
+  - personal_names_of_individuals  # e.g. priest home address, personal email
+  - personal_phone_numbers         # mobile numbers of staff/clergy
+  - personal_email_addresses       # gmail.com, etc.
+  - national_id_numbers          # Lithuanian asmens kodas
+  - bank_account_numbers
+  - passwords_or_tokens
+  - api_keys_or_secrets
+  - photos_of_identifiable_individuals_without_consent
+  - health_data
+  - religious_practice_details_of_individuals
+
+# NOTE: consent_flags in tenant.yaml reference external consent records
+# in docs/consent-registry/<slug>.yaml, which may reference DPIA documents
+# stored elsewhere. The consent registry itself contains only references,
+# not the underlying personal data.

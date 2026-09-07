@@ -1,0 +1,46 @@
+name: "Tenant change request"
+description: "Request a change to an existing tenant (tier, pages, languages, add-ons)"
+title: "fix: <client-slug> — <change summary>"
+labels: ["client/change"]
+body:
+  - type: input
+    id: slug
+    attributes:
+      label: Client slug
+      description: "Existing tenant slug (e.g. kauno-sv-petro-parapija)"
+    validations:
+      required: true
+  - type: dropdown
+    id: change_type
+    attributes:
+      label: Change type
+      options:
+        - Tier upgrade/downgrade
+        - Add add-on
+        - Remove add-on
+        - Add page
+        - Remove page
+        - Add language content
+        - Domain change
+        - Contact update
+        - Theme override
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of change
+      description: What should change and why
+    validations:
+      required: true
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Urgency
+      options:
+        - Low — next scheduled update
+        - Medium — within 2 weeks
+        - High — affects live tenant operations
+    validations:
+      required: true

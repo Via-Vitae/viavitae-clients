@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://viavitae.com/schemas/tenant.schema.json",
+  "title": "ViaVitae Tenant Configuration",
+  "description": "Master schema for a client tenant.yaml file. Version 1.",
+  "type": "object",
+  "required": ["schema_version", "identity", "tier", "pages", "domains", "contacts", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Must match the current master schema version. See ADR-103."
+    },
+    "identity": {
+      "type": "object",
+      "required": ["slug", "display_name", "organization_type", "country", "language_default"],
+      "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "description": "Unique, immutable after provisioning."
+        },
+        "display_name": { "type": "string", "minLength": 1 },
+        "organization_type": {
+          "type": "string",
+          "enum": ["basilica", "cathedral", "diocese", "deanery", "parish", "funeral", "cemetery", "store", "other"]
+        },
+        "country": { "type": "string", "minLength": 2, "maxLength": 2 },
+        "language_default": { "type": "string", "enum": ["lt", "en", "ru"] }
+      }
+    },
+    "tier": {
+      "type": "object",
+      "required": ["package", "maintenance_plan"],
+      "properties": {
+        "package": { "type": "string", "enum": ["economy", "normal", "vip"] },
+        "maintenance_plan": { "type": "string", "enum": ["standard", "premium"] },
+        "billing_ref": { "type": "string" },
+        "addons": {
+          "type": "object",
+          "properties": {
+            "donation_flow": { "type": "boolean" },
+            "donation_impact_page": { "type": "boolean" },
+            "ai_pastoral_assistant": { "type": "boolean" },
+            "gps_cemetery_map": { "type": "boolean" },
+            "crm_dashboard": { "type": "boolean" },
+            "e_commerce": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "pages": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+      "minItems": 1
+    },
+    "domains": {
+      "type": "object",
+      "required": ["primary", "tls"],
+      "properties": {
+        "primary": { "type": "string", "format": "hostname" },
+        "aliases": { "type": "array", "items": { "type": "string" } },
+        "tls": { "type": "string", "enum": ["managed"] }
+      }
+    },
+    "contacts": {
+      "type": "object",
+      "required": ["admin_email"],
+      "properties": {
+        "admin_email": { "type": "string", "format": "email" },
+        "billing_email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" }
+      }
+    },
+    "consent_flags": {
+      "type": "object",
+      "properties": {
+        "publishes_clergy_personal_data": { "type": "boolean" },
+        "cemetery_grave_search": { "type": "boolean" },
+        "ai_assistant_approved_by": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "integrations": {
+      "type": "object",
+      "properties": {
+        "bitrix24_pipeline": { "type": "string" },
+        "payments": { "type": "string" },
+        "analytics_id": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "status": { "type": "string", "enum": ["active", "suspended", "offboarding", "archived"] },
+    "created_by": { "type": "string" },
+    "created_at": { "type": "string", "format": "date" },
+    "change_history_ref": { "type": "string" }
+  }
+}

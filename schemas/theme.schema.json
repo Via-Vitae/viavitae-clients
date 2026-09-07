@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://viavitae.com/schemas/theme.schema.json",
+  "title": "ViaVitae Theme Overrides",
+  "description": "Allowed brand overrides per client. Colors must be within accessible ranges.",
+  "type": "object",
+  "properties": {
+    "logo_variant": { "type": "string", "enum": ["default", "light", "dark", "monochrome"] },
+    "accent_color": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$",
+      "description": "Hex color. Must pass WCAG AA contrast against white (#FFFFFF) and dark (#1a1a2e) backgrounds."
+    },
+    "font_override": { "type": "string", "enum": ["default", "serif", "sans"] }
+  },
+  "additionalProperties": false
+}

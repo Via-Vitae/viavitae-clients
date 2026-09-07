@@ -1,0 +1,30 @@
+# Add-on ↔ tier eligibility matrix
+# Enforced by scripts/validate_tenants.py (referential check).
+# An add-on set to true requires the tenant's tier to be >= the minimum tier.
+
+addons:
+  donation_flow:
+    min_tier: economy
+    description: "Online donation flow with Paysera/Stripe integration"
+  donation_impact_page:
+    min_tier: economy
+    description: "Visual donation impact page showing how contributions are used"
+  ai_pastoral_assistant:
+    min_tier: normal
+    description: "AI-powered pastoral Q&A. Requires chancellor/priest approval."
+    requires_approval: true
+  gps_cemetery_map:
+    min_tier: normal
+    description: "GPS-enabled cemetery grave search. Requires consent_flags."
+    requires_consent: true
+  crm_dashboard:
+    min_tier: economy
+    description: "Embedded Bitrix24 CRM dashboard (client-side, fictional data only)"
+  e_commerce:
+    min_tier: vip
+    description: "Full e-commerce with product catalog, cart, and checkout"
+
+tier_order:
+  - economy
+  - normal
+  - vip
