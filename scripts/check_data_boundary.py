@@ -4,6 +4,7 @@
 Enforces data-boundary.yaml: no personal phone numbers, personal emails,
 national ID numbers, or other PII beyond what tenant.yaml contacts allow.
 """
+
 import re
 import subprocess
 import sys
@@ -14,8 +15,18 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # Patterns that suggest PII beyond public contacts
 PII_PATTERNS = [
     (re.compile(r"\b\d{11}\b"), "Possible personal code (11-digit number)"),
-    (re.compile(r"\b[A-Z][a-z]+ [A-Z][a-z]+ .* (?:tel|mob|cell|phone)[:\s]", re.I), "Personal name with phone"),
-    (re.compile(r"(?:password|passwd|secret|token|api_key)\s*[:=]\s*\S+", re.I), "Possible credential"),
+    (
+        re.compile(
+            r"\b[A-Z][a-z]+ [A-Z][a-z]+ .* (?:tel|mob|cell|phone)[:\s]", re.IGNORECASE
+        ),
+        "Personal name with phone",
+    ),
+    (
+        re.compile(
+            r"(?:password|passwd|secret|token|api_key)\s*[:=]\s*\S+", re.IGNORECASE
+        ),
+        "Possible credential",
+    ),
 ]
 
 
@@ -23,10 +34,17 @@ def get_changed_files() -> list[str]:
     try:
         result = subprocess.run(
             ["git", "diff", "--name-only", "--diff-filter=ACMR", "HEAD~1", "HEAD"],
-            capture_output=True, text=True, cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            cwd=REPO_ROOT,
+            check=False,
         )
-        return [f for f in result.stdout.strip().split("\n") if f and not f.startswith("generated/")]
-    except Exception:
+        return [
+            f
+            for f in result.stdout.strip().split("\n")
+            if f and not f.startswith("generated/")
+        ]
+    except OSError:
         return []
 
 
@@ -34,13 +52,15 @@ def scan_file(filepath: Path) -> list[str]:
     findings: list[str] = []
     try:
         content = filepath.read_text(errors="ignore")
-    except Exception:
+    except OSError:
         return findings
 
     for pattern, description in PII_PATTERNS:
         for match in pattern.finditer(content):
-            line_num = content[:match.start()].count("\n") + 1
-            findings.append(f"{filepath}:{line_num}: {description} — '{match.group()[:30]}...'")
+            line_num = content[: match.start()].count("\n") + 1
+            findings.append(
+                f"{filepath}:{line_num}: {description} — '{match.group()[:30]}...'"
+            )
     return findings
 
 
