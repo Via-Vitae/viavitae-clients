@@ -5,6 +5,7 @@ v1: WARNING on missing keys in non-default languages.
     HARD FAIL only if default language (lt) is missing pages listed in tenant.yaml.
 v2: HARD FAIL on any missing key across all languages.
 """
+
 import sys
 from pathlib import Path
 
@@ -22,7 +23,8 @@ def get_expected_pages(tenant_dir: Path) -> list[str]:
         return []
     with open(tenant_file) as f:
         data = yaml.safe_load(f)
-    return data.get("pages", [])
+    pages = data.get("pages", [])
+    return [str(p) for p in pages] if pages else []
 
 
 def get_actual_pages(content_dir: Path, lang: str) -> set[str]:

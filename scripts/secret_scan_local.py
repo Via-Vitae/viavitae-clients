@@ -4,6 +4,7 @@
 Runs TruffleHog locally against the working tree to catch secrets
 before they reach CI. Requires trufflehog to be installed locally.
 """
+
 import shutil
 import subprocess
 import sys
@@ -14,14 +15,24 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 def main() -> int:
     if not shutil.which("trufflehog"):
-        print("WARNING: trufflehog not found in PATH. Install from https://github.com/trufflesecurity/trufflehog")
+        print(
+            "WARNING: trufflehog not found in PATH. Install from https://github.com/trufflesecurity/trufflehog"
+        )
         print("Skipping local secret scan. CI will still run TruffleHog.")
         return 0
 
     result = subprocess.run(
-        ["trufflehog", "filesystem", "--directory", str(REPO_ROOT), "--only-verified", "--no-update"],
+        [
+            "trufflehog",
+            "filesystem",
+            "--directory",
+            str(REPO_ROOT),
+            "--only-verified",
+            "--no-update",
+        ],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:

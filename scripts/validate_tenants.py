@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 """Validate all tenant.yaml files against the master JSON Schema."""
+
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 import yaml
-from jsonschema import Draft202012Validator, ValidationError
+from jsonschema import Draft202012Validator
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = REPO_ROOT / "schemas" / "tenant.schema.json"
 CLIENTS_DIR = REPO_ROOT / "clients"
 
 
-def load_schema() -> dict:
+def load_schema() -> dict[str, Any]:
     with open(SCHEMA_PATH) as f:
-        return json.load(f)
+        return json.load(f)  # type: ignore[no-any-return]  # type: ignore[no-any-return]
 
 
 def find_tenants() -> list[Path]:
@@ -28,7 +30,7 @@ def find_tenants() -> list[Path]:
     return tenants
 
 
-def validate_tenant(tenant_path: Path, schema: dict) -> list[str]:
+def validate_tenant(tenant_path: Path, schema: dict[str, Any]) -> list[str]:
     errors = []
     with open(tenant_path) as f:
         try:
@@ -57,7 +59,9 @@ def main() -> int:
     if all_errors:
         for err in all_errors:
             print(f"ERROR: {err}", file=sys.stderr)
-        print(f"\n{len(all_errors)} validation error(s) across {len(tenants)} tenant(s).")
+        print(
+            f"\n{len(all_errors)} validation error(s) across {len(tenants)} tenant(s)."
+        )
         return 1
 
     print(f"Validated {len(tenants)} tenant(s). All passed.")

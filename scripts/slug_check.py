@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Check slug format and uniqueness across all tenants including _archive."""
+
 import re
 import sys
 from pathlib import Path
@@ -24,7 +25,9 @@ def main() -> int:
             errors.append(f"Invalid slug format: '{slug}' at {client_dir}")
 
         if slug in seen_slugs:
-            errors.append(f"Duplicate slug '{slug}': {client_dir} and {seen_slugs[slug]}")
+            errors.append(
+                f"Duplicate slug '{slug}': {client_dir} and {seen_slugs[slug]}"
+            )
         seen_slugs[slug] = client_dir
 
     # Check archive slugs too (strip .archived suffix)
@@ -38,7 +41,9 @@ def main() -> int:
             if not SLUG_PATTERN.match(slug):
                 errors.append(f"Invalid archived slug: '{slug}' at {archived}")
             if slug in seen_slugs:
-                errors.append(f"Slug '{slug}' exists in both active and archive: {seen_slugs[slug]} and {archived}")
+                errors.append(
+                    f"Slug '{slug}' exists in both active and archive: {seen_slugs[slug]} and {archived}"
+                )
 
     if errors:
         for err in errors:

@@ -5,6 +5,7 @@ Enforces guardrail G5: any tenant with publishes_clergy_personal_data=true,
 cemetery_grave_search=true, or ai_assistant_approved_by set must have a
 corresponding file in docs/consent-registry/<slug>.yaml.
 """
+
 import sys
 from pathlib import Path
 
@@ -31,11 +32,13 @@ def main() -> int:
         consent = data.get("consent_flags", {})
         slug = data.get("identity", {}).get("slug", client_dir.name)
 
-        needs_consent_record = any([
-            consent.get("publishes_clergy_personal_data") is True,
-            consent.get("cemetery_grave_search") is True,
-            consent.get("ai_assistant_approved_by") is not None,
-        ])
+        needs_consent_record = any(
+            [
+                consent.get("publishes_clergy_personal_data") is True,
+                consent.get("cemetery_grave_search") is True,
+                consent.get("ai_assistant_approved_by") is not None,
+            ]
+        )
 
         if needs_consent_record:
             consent_file = CONSENT_DIR / f"{slug}.yaml"

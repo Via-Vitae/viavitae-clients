@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Generate generated/manifest.json — full inventory of tenants with hashes."""
+
 import hashlib
 import json
 import sys
@@ -31,7 +32,9 @@ def main() -> int:
 
         slug = data.get("identity", {}).get("slug", client_dir.name)
         tenants[slug] = {
-            "path": str(client_file.relative_to(REPO_ROOT)) if (client_file := tenant_file).exists() else "",
+            "path": str(client_file.relative_to(REPO_ROOT))
+            if (client_file := tenant_file).exists()
+            else "",
             "hash": file_hash(tenant_file),
             "status": data.get("status", "unknown"),
             "tier": data.get("tier", {}).get("package", "unknown"),
