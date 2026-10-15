@@ -30,7 +30,7 @@ Lithuanian (lt), English (en), and Russian (ru). Lithuanian is the default for t
 
 ## Who can I contact about data privacy?
 
-Email `dpo@viavitae.com` for any data protection questions.
+Email `journey4oflife+viavitae.privacy@gmail.com` for any data protection questions.
 
 ## What happens when we want to stop using the service?
 

@@ -15,7 +15,7 @@ Because ViaVitae serves religious communities, contributors additionally commit 
 respecting the confidentiality and dignity of data subjects — many of whom are members of
 a congregation and never consented to their data being discussed in a public forum.
 
-Report a concern to `legal@viavitae.com`.
+Report a concern to `journey4oflife+viavitae.billing@gmail.com`.
 
 ## The Golden Rule
 
@@ -125,5 +125,5 @@ not violated. Note in the PR description that AI assistance was used.
 | --- | --- |
 | Onboarding workflow | [docs/onboarding-runbook.md](docs/onboarding-runbook.md) |
 | Schema questions | `schemas/tenant.schema.json` + ADR-102 |
-| Personal data, DPIA | `dpo@viavitae.com` |
-| Vulnerabilities | `security@viavitae.com` — private, per SECURITY.md |
+| Personal data, DPIA | `journey4oflife+viavitae.privacy@gmail.com` |
+| Vulnerabilities | `journey4oflife+viavitae.security@gmail.com` — private, per SECURITY.md |

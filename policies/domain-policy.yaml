@@ -23,4 +23,4 @@ rules:
   caa_records:
     - "0 issue \"letsencrypt.org\""
     - "0 issuewild \"letsencrypt.org\""
-    - "0 iodef \"mailto:security@viavitae.com\""
+    - "0 iodef \"mailto:journey4oflife+viavitae.security@gmail.com\""
