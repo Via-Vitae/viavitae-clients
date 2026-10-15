@@ -16,7 +16,7 @@ CLIENTS_DIR = REPO_ROOT / "clients"
 
 def load_schema() -> dict[str, Any]:
     with open(SCHEMA_PATH) as f:
-        return json.load(f)  # type: ignore[no-any-return]  # type: ignore[no-any-return]
+        return json.load(f)  # type: ignore[no-any-return]
 
 
 def find_tenants() -> list[Path]:
