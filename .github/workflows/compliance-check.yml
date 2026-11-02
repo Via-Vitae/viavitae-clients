@@ -48,7 +48,7 @@ jobs:
           fetch-depth: 0
 
       - name: TruffleHog (full history, verified only)
-        uses: trufflesecurity/trufflehog@080c22fb8ea3107163b9dbcc33396a41c518b990 # main
+        uses: trufflesecurity/trufflehog@5a3176fcddc07bed6ee62a84adb613091030b243 # main
         with:
           path: ./
           extra_args: --only-verified
@@ -75,7 +75,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
